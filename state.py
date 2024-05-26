@@ -8,19 +8,19 @@ class StateStatus(Enum):
     Success = 2 # formula is in assumptions
 
 class SingleState:
-    def __init__(self, f: ft.Formula, assumptions: Stack[ft.Formula] = [], depth: int = 0) -> None:
+    def __init__(self, f: ft.Formula, assumptions: list[ft.Formula] = [], depth: int = 0) -> None:
         assert issubclass(type(f), ft.Formula), "f is not a subclass of Formula!"
         assert isinstance(depth, int) and depth >= 0, "depth must be non-negative integer!"
+        
         self.formulaToBeProved = f
         self.assumptions = assumptions
         self.depth = depth
         self.stateStatus = StateStatus.InProgress
         # todo: ???
 
-class Proof:
-    def __init__(self, f: ft.Formula, maxLeafs: int) -> None:
-        assert issubclass(type(f), ft.Formula), "f is not a subclass of Formula!"
-        assert isinstance(maxLeafs, int) and maxLeafs >= 1, "Maximum amount of leafs allowed must be positive integer!"
-        self.stack: Stack[SingleState] = Stack(maxLeafs)
-        self.stack.put_nowait(SingleState(f))
-        # todo: ???
+    def is_proven(self)->bool:
+        # return  isinstance(self.formulaToBeProved, ft.TrueF) or \
+        #         self.formulaToBeProved in self.assumptions
+        ok = isinstance(self.formulaToBeProved, ft.TrueF)
+        ok = ok or self.formulaToBeProved in self.assumptions
+        return ok
