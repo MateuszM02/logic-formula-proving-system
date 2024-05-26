@@ -3,12 +3,12 @@ import state
 from abc import abstractmethod
 from copy import deepcopy
 
-class NegationElimination():
+class NegationElimination(ft.Rule):
     @abstractmethod
     def __init__(self):
         pass
 
-    def use_rule(current_state: state.SingleState, alpha: ft.Formula):
+    def use_rule(current_state: state.SingleState, alpha: ft.Formula)->tuple[state.SingleState]:
         assert isinstance(current_state, state.SingleState), "Given argument is not a proof state!"
         assert isinstance(current_state.formulaToBeProved, ft.FalseF), "Formula not a False!"
         assert issubclass(type(alpha), ft.Formula), "Given argument is not a subclass of Formula!"
@@ -24,12 +24,12 @@ class NegationElimination():
             current_state.depth + 1)
         return (new_state1, new_state2)
 
-class ConjunctionElimination():
+class ConjunctionElimination(ft.Rule):
     @abstractmethod
     def __init__(self):
         pass
 
-    def use_rule(current_state: state.SingleState, alpha: ft.Formula):
+    def use_rule(current_state: state.SingleState, alpha: ft.Formula)->tuple[state.SingleState]:
         assert isinstance(current_state, state.SingleState), "Given argument is not a proof state!"
         assert isinstance(current_state.formulaToBeProved, ft.Formula), "Given state has invalid formula!"
         assert issubclass(type(alpha), ft.Formula), "Given argument is not a subclass of Formula!"
@@ -38,23 +38,23 @@ class ConjunctionElimination():
             ft.Conjunction(current_state.formulaToBeProved, alpha),
             current_state.assumptions,
             current_state.depth + 1)
-        return new_state
+        return new_state,
     
-class DisjunctionElimination():
+class DisjunctionElimination(ft.Rule):
     @abstractmethod
     def __init__(self):
         pass
 
-    def use_rule(current_state: state.SingleState, alpha: ft.Formula, beta: ft.Formula):
+    def use_rule(current_state: state.SingleState, alpha: ft.Formula, beta: ft.Formula)->tuple[state.SingleState]:
         assert isinstance(current_state, state.SingleState), "Given argument is not a proof state!"
         assert isinstance(current_state.formulaToBeProved, ft.Formula), "Given state has invalid formula!"
         assert issubclass(type(alpha), ft.Formula), "Given argument is not a subclass of Formula!"
         assert issubclass(type(beta), ft.Formula), "Given argument is not a subclass of Formula!"
         
         new_assumptions1 = deepcopy(current_state.assumptions)
-        new_assumptions1.put_nowait(alpha)
+        new_assumptions1.append(alpha)
         new_assumptions2 = deepcopy(current_state.assumptions)
-        new_assumptions2.put_nowait(beta)
+        new_assumptions2.append(beta)
 
         new_state1 = state.SingleState(
             ft.Disjunction(alpha, beta),
@@ -70,12 +70,12 @@ class DisjunctionElimination():
             current_state.depth + 1)
         return (new_state1, new_state2, new_state3)
 
-class ImplicationElimination():
+class ImplicationElimination(ft.Rule):
     @abstractmethod
     def __init__(self):
         pass
 
-    def use_rule(current_state: state.SingleState, alpha: ft.Formula):
+    def use_rule(current_state: state.SingleState, alpha: ft.Formula)->tuple[state.SingleState]:
         assert isinstance(current_state, state.SingleState), "Given argument is not a proof state!"
         assert isinstance(current_state.formulaToBeProved, ft.Formula), "Given state has invalid formula!"
         assert issubclass(type(alpha), ft.Formula), "Given argument is not a subclass of Formula!"
@@ -90,12 +90,12 @@ class ImplicationElimination():
             current_state.depth + 1)
         return (new_state1, new_state2)
     
-class FalseElimination():
+class FalseElimination(ft.Rule):
     @abstractmethod
     def __init__(self):
         pass
 
-    def use_rule(current_state: state.SingleState):
+    def use_rule(current_state: state.SingleState)->tuple[state.SingleState]:
         assert isinstance(current_state, state.SingleState), "Given argument is not a proof state!"
         assert isinstance(current_state.formulaToBeProved, ft.Formula), "Given state has invalid formula!"
        
@@ -103,4 +103,4 @@ class FalseElimination():
             ft.FalseF(),
             current_state.assumptions, 
             current_state.depth + 1)
-        return new_state
+        return new_state,

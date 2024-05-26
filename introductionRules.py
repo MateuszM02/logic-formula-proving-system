@@ -1,33 +1,33 @@
 import formulaTypes as ft
 import state
-from abc import abstractmethod
+from abc import ABC, abstractmethod
 from copy import deepcopy
 
-class NegationIntroduction():
+class NegationIntroduction(ft.Rule):
     @abstractmethod
     def __init__(self):
         pass
 
-    def use_rule(current_state: state.SingleState):
+    def use_rule(current_state: state.SingleState)->tuple[state.SingleState]:
         assert isinstance(current_state, state.SingleState), "Given argument is not a proof state!"
         assert isinstance(current_state.formulaToBeProved, ft.Negation), "Formula not a negation!"
         
         notNegatedFormula = current_state.formulaToBeProved.formula
         new_assumptions = deepcopy(current_state.assumptions)
-        new_assumptions.put_nowait(notNegatedFormula)
+        new_assumptions.append(notNegatedFormula)
         
         new_state = state.SingleState(
             ft.FalseF(), 
             new_assumptions, 
             current_state.depth + 1)
-        return new_state
+        return new_state,
 
-class ConjunctionIntroduction():
+class ConjunctionIntroduction(ft.Rule):
     @abstractmethod
     def __init__(self):
         pass
 
-    def use_rule(current_state: state.SingleState):
+    def use_rule(current_state: state.SingleState)->tuple[state.SingleState]:
         assert isinstance(current_state, state.SingleState), "Given argument is not a proof state!"
         assert isinstance(current_state.formulaToBeProved, ft.Conjunction), "Formula not a conjunction!"
         
@@ -41,13 +41,14 @@ class ConjunctionIntroduction():
             current_state.assumptions,
             current_state.depth + 1)
         return (new_state1, new_state2)
-    
-class DisjunctionIntroduction():
+
+class DisjunctionIntroduction(ft.Rule, ABC):
     @abstractmethod
-    def __init__(self):
+    def use_rule(current_state: state.SingleState) -> state.SingleState:
         pass
 
-    def use_rule1(current_state: state.SingleState):
+class DisjunctionIntroduction1(DisjunctionIntroduction):
+    def use_rule(current_state: state.SingleState) -> state.SingleState:
         assert isinstance(current_state, state.SingleState), "Given argument is not a proof state!"
         assert isinstance(current_state.formulaToBeProved, ft.Disjunction), "Formula not a disjunction!"
         
@@ -55,9 +56,10 @@ class DisjunctionIntroduction():
             current_state.formulaToBeProved.formula1,
             current_state.assumptions,
             current_state.depth + 1)
-        return new_state1
-    
-    def use_rule2(current_state: state.SingleState):
+        return new_state1,
+
+class DisjunctionIntroduction2(DisjunctionIntroduction):
+    def use_rule(current_state: state.SingleState) -> state.SingleState:
         assert isinstance(current_state, state.SingleState), "Given argument is not a proof state!"
         assert isinstance(current_state.formulaToBeProved, ft.Disjunction), "Formula not a disjunction!"
         
@@ -65,14 +67,14 @@ class DisjunctionIntroduction():
             current_state.formulaToBeProved.formula2,
             current_state.assumptions,
             current_state.depth + 1)
-        return new_state2
+        return new_state2,
 
-class ImplicationIntroduction():
+class ImplicationIntroduction(ft.Rule):
     @abstractmethod
     def __init__(self):
         pass
 
-    def use_rule(current_state: state.SingleState):
+    def use_rule(current_state: state.SingleState)->tuple[state.SingleState]:
         assert isinstance(current_state, state.SingleState), "Given argument is not a proof state!"
         assert isinstance(current_state.formulaToBeProved, ft.Implication), "Formula not an implication!"
         
@@ -80,10 +82,10 @@ class ImplicationIntroduction():
         beta = current_state.formulaToBeProved.formula2
 
         new_assumptions = deepcopy(current_state.assumptions)
-        new_assumptions.put_nowait(alpha)
+        new_assumptions.append(alpha)
         
         new_state = state.SingleState(
             beta, 
             new_assumptions, 
             current_state.depth + 1)
-        return new_state
+        return new_state,
